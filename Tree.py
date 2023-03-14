@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-from Node import Node
 import polars as pl
 import math as mt
 
-class Tree:  # TODO add auto classification or regression
+#TODO add annotation
+class Tree:
     def __init__(self, df, *, target, depth=0, root=None, max_depth=3, id=1) -> None:
         self.id = id
         self.df = df

@@ -2,6 +2,7 @@
 from Tree import Tree
 from statistics import mean
 
+#TODO add annotation
 class Forest:
     def __init__(self, df, *, target, n_trees=10) -> None:
         self.df = df
