@@ -4,24 +4,37 @@ import polars as pl
 import math as mt
 
 class Tree:
-    def __init__(self, df, target, *, depth=0, root=None) -> None:
+    def __init__(self, df, *, target, depth=0, root=None, max_depth=3) -> None:
         self.df = df
         self.target = target
-        self.Root = None
-        self.branch_left = None
-        self.branch_right = None
+        self.Root = root
         self.Depth = depth
         self.thresh = 0
+        self.split_criteria = self._Average_entropy
+        self.is_leaf = self._Leaf(df, target)
+        if self.is_leaf is True or self.Depth > max_depth:
+            self.branch_left = None
+            self.branch_right = None
+            self.val = self.df.select(pl.col(self.target).mode())[0, 0]
+            a=1
+        else:
+            z, df_l, df_r, thr = self._Split(df, target, self.split_criteria)
+            self.branch_left = Tree(df_l, target=self.target, depth=self.Depth + 1, root=self, max_depth=max_depth)
+            self.branch_right = Tree(df_r, target=self.target, depth=self.Depth + 1, root=self, max_depth=max_depth)
+            self.val = thr
+
+    def _Leaf(self, df, target) -> bool:
+        # check if a df is pure
+        a = df.groupby(target, maintain_order=True).agg(pl.count())
+        if a.shape[0] == 1:
+            return True
+        else:
+            return False
+
 
     def _Split(self, df, target, split_criteria) -> None:
-        z, df_left, df_right, self.thresh = \
-            self._Best_split(df, target, split_criteria)
-
-        # make a new tree with on df
-        self.branch_left = Tree(df_left, self.target, depth=self.Depth + 1, root=self)
-        # make the other tree with another df
-        self.branch_right = Tree(df_right, self.target, depth=self.Depth + 1, root=self)
-        return
+        print("made a split")
+        return self._Best_split(df, target, split_criteria)
 
     def _Entropy(self, df, target):
         # count occurrence of different categories in df and divide by total size to get pi of category
@@ -81,6 +94,7 @@ class Tree:
         index = weighted_splits.index(min_split)
 
         return min_split, split[index], split_comp[index], split_value[index]
+
 
     def _Best_split(self, df, target, split_criteria):
         n_attr = df.shape[1] - 1
