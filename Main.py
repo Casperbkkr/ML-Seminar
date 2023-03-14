@@ -4,10 +4,11 @@ import polars as pl
 from Tree import Tree
 df = pl.read_csv('iris.csv')
 
-T = Tree(df)
+T = Tree(df, 'Species')
 
-a = T._Possible_splits_col(T.df, "SepalLengthCm", 1)
-
-
+a = T._Entropy(T.df, 'Species')
+b = T._Average_entropy(T.df, T.df, 'Species')
+c = T._Possible_splits_col(T.df, 'SepalLengthCm')
+print(b)
 
 x=1
